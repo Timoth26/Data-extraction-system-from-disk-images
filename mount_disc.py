@@ -34,7 +34,7 @@ class DiskImageManager:
 
     def mount_partition(self, partition, mount_point):
         try:
-            subprocess.run(['sudo', 'mount', partition, mount_point], check=True)
+            subprocess.run(['sudo', 'mount', '-o', 'ro', partition, mount_point], check=True)
             print(f"Partition {partition} mounted at {mount_point}.")
             self.mount_points.append(mount_point)
             return True
