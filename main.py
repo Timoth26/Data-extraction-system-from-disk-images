@@ -28,7 +28,7 @@ def main():
         os_system = detect_operating_system(partition)
         os_results[partition] = os_system
         paths = get_path(partition, extensions)
-        analyze_results = analyze_files(paths, f'final_results_{author['Nr']}.txt')
+        analyze_results = analyze_files(paths, f"final_results_{author['Nr']}.txt")
     
     generate_pdf_report(os_results, str(args.image_path), count_entities(analyze_results), author)
     
