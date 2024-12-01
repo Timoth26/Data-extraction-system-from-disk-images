@@ -3,10 +3,11 @@ import pdfplumber
 from docx import Document
 from bs4 import BeautifulSoup
 from lxml import etree
+from collections import Counter
 
-def analyze_files(file_paths, output_file, score_threshold=0.80):
+def analyze_files(file_paths, output_file, score_threshold=0.80, chunk_size=1000):
 
-    ner_pipeline = pipeline("token-classification", model='lakshyakh93/deberta_finetuned_pii', device=-1, aggregation_strategy="simple")
+    ner_pipeline = pipeline("token-classification", model="iiiorg/piiranha-v1-detect-personal-information", aggregation_strategy="simple")
     results = {}
 
     with open(output_file, "w", encoding="utf-8") as result_file:
@@ -38,7 +39,11 @@ def analyze_files(file_paths, output_file, score_threshold=0.80):
                     results[file_path] = None
                     continue
 
-                ner_results = ner_pipeline(text)
+                ner_results = []
+                for i in range(0, len(text), chunk_size):
+                    chunk = text[i:i+chunk_size]
+                    ner_results.extend(ner_pipeline(chunk))
+                    
                 filtered_results = [entity for entity in ner_results if entity['score'] >= score_threshold]
 
                 result_file.write(f"Analysis of file: {file_path}\n\n")
