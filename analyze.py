@@ -86,3 +86,11 @@ def extract_text_from_xml(xml_path):
     with open(xml_path, "rb") as file:
         tree = etree.parse(file)
     return " ".join(tree.xpath("//text()"))
+
+def count_entities(results):
+    entity_groups = []
+    for key, value in results.items():
+        entity_groups.extend([item['entity_group'] for item in value])
+    
+    entity_group_counts = Counter(entity_groups)
+    return dict(entity_group_counts)
