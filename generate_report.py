@@ -2,16 +2,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
-def generate_pdf_report(partition_data, disk_image_name, personal_data, author, output_path='./report.pdf'):
-    """
-    Generates a PDF report based on the operating systems on the partitions and personal data obtained.
-
-    :param output_path: Path to save the PDF file.
-    :param partition_data: Dictionary in the format {partition: operating_system}.
-    :param disk_image_name: Name of the disk image being analyzed.
-    :param personal_data: Dictionary in the format {entity_group: count}.
-    :param author: Dictionary containing the author's details.
-    """
+def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, output_path='./results/report.pdf'):
     try:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -73,20 +64,71 @@ def generate_pdf_report(partition_data, disk_image_name, personal_data, author, 
                 y_position -= 15
                 check_page_break()
 
-            y_position -= 10
+            if partition in users:
+                user_info = users[partition]
+                pdf.drawString(70, y_position, "USERS: ")
+                y_position -= 15
+                check_page_break()
+
+                if user_info["status"] == "ok" and user_info["users"]:
+                    users_str = ", ".join(user_info["users"])
+                    pdf.drawString(90, y_position, users_str)
+                    y_position -= 15
+                    check_page_break()
+                else:
+                    message = user_info.get("message", "No users found")
+                    pdf.drawString(90, y_position, message)
+                    y_position -= 15
+                    check_page_break()
+
+                y_position -= 10
+                check_page_break()
+
+
+        # Add Personal Data section if data exists
+        if personal_data:
+            pdf.setFont("Helvetica-Bold", 14)
+            pdf.drawString(50, y_position, "Personal Data Obtained")
+            y_position -= 20
             check_page_break()
 
-        # Add Personal Data section
-        pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, y_position, "Personal Data Obtained")
-        y_position -= 20
-        check_page_break()
+            pdf.setFont("Helvetica", 12)
+            for entity_group, count in personal_data.items():
+                pdf.drawString(50, y_position, f"Type: {entity_group}, Found: {count}")
+                y_position -= 15
+                check_page_break()
 
-        pdf.setFont("Helvetica", 12)
-        for entity_group, count in personal_data.items():
-            pdf.drawString(50, y_position, f"Type: {entity_group}, Found: {count}")
-            y_position -= 15
+        # Add Emails section if emails are found
+        email_results = list(email_results)
+        if email_results:
+            pdf.setFont("Helvetica-Bold", 14)
+            pdf.drawString(50, y_position, "Emails Found")
+            y_position -= 20
             check_page_break()
+
+            pdf.setFont("Helvetica", 12)
+            for email in sorted(email_results):
+                pdf.drawString(50, y_position, email)
+                y_position -= 15
+                check_page_break()
+
+        # Add Social Media section if data is found
+        if social_results:
+            pdf.setFont("Helvetica-Bold", 14)
+            pdf.drawString(50, y_position, "Social Media Accounts Found")
+            y_position -= 20
+            check_page_break()
+
+            pdf.setFont("Helvetica", 12)
+            for social_data in social_results:
+                if social_data:
+                    for browser, hosts in social_data.items():
+                        if isinstance(hosts, dict):
+                            for host, count in hosts.items():
+                                pdf.drawString(50, y_position, f"Browser: {browser}, Host: {host}, Count: {count}")
+                                y_position -= 15
+                                check_page_break()
+
 
         # Save the PDF file
         pdf.save()
