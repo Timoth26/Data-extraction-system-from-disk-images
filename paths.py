@@ -63,3 +63,61 @@ def detect_operating_system(partition_path):
         os_info["message"] = "No recognizable OS detected on the partition"
 
     return os_info
+
+
+def detect_users(partition_path, os_type):
+    users_info = {"status": "ok", "users": []}
+
+    try:
+        # Detect Linux users
+        if os_type == "Linux":
+            passwd_path = os.path.join(partition_path, "etc/passwd")
+            if os.path.exists(passwd_path):
+                with open(passwd_path, "r") as f:
+                    for line in f:
+                        parts = line.split(":")
+                        if len(parts) > 1:
+                            username = parts[0]
+                            home_dir = parts[5]
+                            if "/home/" in home_dir:
+                                users_info["users"].append(username)
+            else:
+                users_info["status"] = "error"
+                users_info["message"] = f"{passwd_path} not found"
+
+        # Detect Windows users
+        elif os_type == "Windows":
+            users_dir = os.path.join(partition_path, "Users")
+            if os.path.exists(users_dir):
+                users_info["users"] = [
+                    user for user in os.listdir(users_dir) 
+                    if os.path.isdir(os.path.join(users_dir, user)) and not user.startswith("Default")
+                ]
+            else:
+                users_info["status"] = "error"
+                users_info["message"] = f"{users_dir} not found"
+
+        # Detect macOS users
+        elif os_type == "MacOS":
+            plist_path = os.path.join(partition_path, "var/db/dslocal/nodes/Default/users")
+            if os.path.exists(plist_path):
+                for file in os.listdir(plist_path):
+                    if file.endswith(".plist"):
+                        user_path = os.path.join(plist_path, file)
+                        with open(user_path, "rb") as f:
+                            plist_data = plistlib.load(f)
+                            if "home" in plist_data:
+                                users_info["users"].append(file.replace(".plist", ""))
+            else:
+                users_info["status"] = "error"
+                users_info["message"] = f"{plist_path} not found"
+
+        else:
+            users_info["status"] = "error"
+            users_info["message"] = "Unsupported OS type"
+
+    except Exception as e:
+        users_info["status"] = "error"
+        users_info["message"] = f"Failed to detect users: {e}"
+
+    return users_info
