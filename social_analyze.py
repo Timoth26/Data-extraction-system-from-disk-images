@@ -6,8 +6,19 @@ def extract_social_media_data(partition_path, output_file='social_media_analysis
     social_media_domains = [
         'facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com',
         'tiktok.com', 'pinterest.com', 'reddit.com', 'snapchat.com',
-        'tumblr.com', 'vk.com', 'whatsapp.com', 'youtube.com', 'discord.com'
+        'tumblr.com', 'vk.com', 'whatsapp.com', 'youtube.com', 'discord.com',
+        'flickr.com', 'wechat.com', 'viber.com', 'zoom.us', 'skype.com',
+        'myspace.com', 'periscope.tv', 'xing.com', 'soundcloud.com', 'spotify.com',
+        'yahoo.com', 'meetup.com', 'foursquare.com', 'quora.com', 'mix.com',
+        'plurk.com', 'behance.net', 'dribbble.com', 'medium.com', 'slack.com',
+        'telegram.org', 'line.me', 'weibo.com', 'snapchat.com', 'reddit.com',
+        'clubhouse.com', 'kakao.com', 'ok.ru', 'twitch.tv', 'dailymotion.com',
+        'badoo.com', 'match.com', 'grindr.com', 'taringa.net', 'ask.fm', 'vimeo.com',
+        'foursquare.com', 'periscope.tv', 'stumbleupon.com', 'livejournal.com', 'icq.com',
+        'yandex.ru', 'turing.com', 'baidu.com', 'qq.com', 'bilibili.com', 'douyin.com',
+        'koubei.com', 'renren.com', 'douban.com', 'qqmail.com', 'zhihu.com', 'whatsapp.com'
     ]
+
     browser_files = {
         'chrome': {
             'history': ['History'],
