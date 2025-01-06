@@ -1,4 +1,5 @@
 import argparse
+import os
 from mount_disc import DiskImageManager
 from paths import get_path, detect_operating_system, detect_users
 from analyze import analyze_files, count_entities
@@ -7,18 +8,83 @@ from email_finder import search_emails_in_files
 from social_analyze import extract_social_media_data
 
 def main():
-    parser = argparse.ArgumentParser(description="Mount a disk image and process its partitions.")
-    parser.add_argument('image_path', type=str, help="Path to the disk image file")
-    parser.add_argument('--name', type=str, required=False, help="Name of the person", default='')
-    parser.add_argument('--surname', type=str, required=False, help="Surname of the person", default='')
-    parser.add_argument('--nr', type=str, required=False, help="Number (identifier)", default='')
-    parser.add_argument('-a', '--analyze', action='store_true', required=False, help="Run AI analysis", default=False)
-    parser.add_argument('-e', '--emails', action='store_true', required=False, help="Run regex email analysis", default=False)
-    parser.add_argument('-o', '--ocr', action='store_true', required=False, help="Run OCR analysis", default=False)
-    parser.add_argument('-s', '--social', action='store_true', required=False, help="Run social media analysis", default=False)
-    parser.add_argument('-r', '--require_system_dir_analyse', action='store_false', required=False, help="Run analysis also in system directories", default=True)
+    parser = argparse.ArgumentParser(
+    description=(
+        "This script mounts a disk image and processes its partitions. "
+        "It supports detecting operating systems, analyzing files, extracting emails, "
+        "running OCR on images, analyzing social media data, and identifying personal data. "
+        "The program is designed to detect sensitive personal information such as names, email addresses, and other identifiable data."
+    )
 
+    )
+    parser.add_argument(
+        'image_path', 
+        type=str, 
+        help="Absolute or relative path to the disk image file. Example: '/path/to/image.img."
+    )
+    parser.add_argument(
+        '--name', 
+        type=str, 
+        required=False, 
+        help="The first name of the person to be included in the metadata for the generated report.", 
+        default=''
+    )
+    parser.add_argument(
+        '--surname', 
+        type=str, 
+        required=False, 
+        help="The surname of the person to be included in the metadata for the generated report.", 
+        default=''
+    )
+    parser.add_argument(
+        '--nr', 
+        type=str, 
+        required=False, 
+        help="A unique identifier or number for the report. Example: '001', 'A123'.", 
+        default=''
+    )
+    parser.add_argument(
+        '-a', '--analyze', 
+        action='store_true', 
+        help=(
+            "Enable AI-powered analysis of text-based files. "
+            "Analyzed file types include .txt, .pdf, .docx, .doc, .html, .xml, .log, .csv, and more."
+        )
+    )
+    parser.add_argument(
+        '-e', '--emails', 
+        action='store_true', 
+        help=(
+            "Enable regex-based extraction of email addresses from files. "
+            "Works on text, JSON, XML, CSV, and other supported formats."
+        )
+    )
+    parser.add_argument(
+        '-o', '--ocr', 
+        action='store_true', 
+        help=(
+            "Enable Optical Character Recognition (OCR) for analyzing image-based files. "
+            "Supported file types: .png, .jpeg, .jpg."
+        )
+    )
+    parser.add_argument(
+        '-s', '--social', 
+        action='store_true', 
+        help=(
+            "Enable extraction of social media data from files and directories. "
+            "This involves searching for patterns and extracting relevant social media information."
+        )
+    )
+    parser.add_argument(
+        '-r', '--sys_dir_analysis', 
+        action='store_false', 
+        help=(
+            "Include system directories in the file search and analysis. "
+            "By default, system directories are excluded for efficiency."
+        )
+    )
     args = parser.parse_args()
+    
     extensions = []
 
     if args.analyze:
@@ -39,6 +105,10 @@ def main():
     email_results = set()
     analyze_results = {}
     social_results = []
+    
+    if not os.path.exists('./results'):
+        os.makedirs('./results')
+
 
     for partition in disk.mount_points:
         print(f"[INFO] Processing partition: {partition}")
