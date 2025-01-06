@@ -16,6 +16,7 @@ def main():
     parser.add_argument('-e', '--emails', action='store_true', required=False, help="Run regex email analysis", default=False)
     parser.add_argument('-o', '--ocr', action='store_true', required=False, help="Run OCR analysis", default=False)
     parser.add_argument('-s', '--social', action='store_true', required=False, help="Run OCR analysis", default=False)
+    parser.add_argument('-r', '--require_system_dir_analyse', action='store_false', required=False, help="Run analysis also in system directories", default=True)
 
     
     args = parser.parse_args()
@@ -57,7 +58,7 @@ def main():
 
         
         os_results[partition] = os_system
-        paths = get_path(partition, extensions)
+        paths = get_path(partition, extensions, args.require_system_dir_analyse)
         
         if args.analyze or args.ocr:
             analyze_results = analyze_files(paths, f"./results/analyze_results_{author['Nr']}.txt")
@@ -68,7 +69,7 @@ def main():
             
         print(social_results)
     
-    generate_pdf_report(os_results, users, str(args.image_path), count_entities(analyze_results), email_results, social_results, author)
+    generate_pdf_report(os_results, users, str(args.image_path), count_entities(analyze_results), email_results, social_results, author, output_path=f"./results/report_{author['Nr']}.pdf")
     
     disk.cleanup()
 
