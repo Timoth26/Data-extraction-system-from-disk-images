@@ -197,7 +197,6 @@ def count_entities(results):
     if results:
         entity_groups = []
         for key, value in results.items():
-            print('AAAAA', key, ' ', value)
             entity_groups.extend([item['entity_group'] for item in value])
         
         entity_group_counts = Counter(entity_groups)
