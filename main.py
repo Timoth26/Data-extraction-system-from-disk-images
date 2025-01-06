@@ -103,7 +103,7 @@ def main():
     os_results = {}
     users = {}
     email_results = set()
-    analyze_results = {}
+    analyze_results = []
     social_results = []
     
     if not os.path.exists('./results'):
@@ -137,11 +137,11 @@ def main():
 
         if args.analyze or args.ocr:
             print("[INFO] Starting file analysis...")
-            analyze_results = analyze_files(paths, f"./results/analyze_results_{author['Nr']}.txt")
+            analyze_results.append(analyze_files(paths, f"./results/analyze_results_{author['Nr']}.txt"))
 
         if args.emails:
             print("[INFO] Searching for email addresses...")
-            email_results = search_emails_in_files(paths, f"./results/email_results_{author['Nr']}.txt")
+            email_results.update(search_emails_in_files(paths, f"./results/email_results_{author['Nr']}.txt"))
 
         if args.social:
             print("[INFO] Extracting social media data...")

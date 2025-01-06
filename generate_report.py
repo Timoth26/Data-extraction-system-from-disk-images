@@ -85,6 +85,9 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 check_page_break()
 
 
+        y_position -= 10
+        check_page_break()
+
         # Add Personal Data section if data exists
         if personal_data:
             pdf.setFont("Helvetica-Bold", 14)
