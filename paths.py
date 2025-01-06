@@ -2,16 +2,29 @@ import os
 import subprocess
 import plistlib
 
-def get_path(partition, extensions=[".txt"]):
+import os
+
+def get_path(partition, extensions=[".txt"], skip_system_paths=True):
     file_paths = []
 
+    system_paths = [
+        "/proc", "/sys", "/dev", "/run", "/var/lib", "/var/run",  # Linux
+        "C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)",  # Windows
+        "/usr", "/boot", "/etc"  # Linux
+    ]
+
     print(f"Searching in the partition: {partition}")
+
     for root, dirs, files in os.walk(partition):
+        if skip_system_paths and any(root.startswith(path) for path in system_paths):
+            continue
+
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 file_paths.append(os.path.join(root, file))
 
     return file_paths
+
 
 
 def detect_operating_system(partition_path):
