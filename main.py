@@ -133,7 +133,7 @@ def main():
         os_results[partition] = os_system
 
         print("[INFO] Searching for files...")
-        paths = get_path(partition, extensions, args.require_system_dir_analyse)
+        paths = get_path(partition, extensions, args.sys_dir_analysis)
 
         if args.analyze or args.ocr:
             print("[INFO] Starting file analysis...")
