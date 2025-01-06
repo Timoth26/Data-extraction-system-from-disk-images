@@ -63,7 +63,7 @@ def analyze_history_file(history_file, social_media_domains, results, browser):
     try:
         conn = sqlite3.connect(history_file)
         cursor = conn.cursor()
-        print(f"Analyzing ({browser}): {history_file}")
+        print(f"[INFO] Analyzing ({browser}): {history_file}")
 
         if browser in ['chrome', 'edge', 'opera']:
             cursor.execute("SELECT url, title, visit_count, last_visit_time FROM urls")
@@ -87,18 +87,18 @@ def analyze_history_file(history_file, social_media_domains, results, browser):
                     })
         conn.close()
     except Exception as e:
-        print(f"Error: ({browser}): {history_file}, {e}")
+        print(f"[ERROR] Error: ({browser}): {history_file}, {e}")
 
 
 def analyze_cookies_file(cookies_file, social_media_domains, results, browser):
     try:
         if browser == 'safari' and cookies_file.endswith('.binarycookies'):
-            print(f"Cookies Safari ({browser}) : {cookies_file}")
+            print(f"[INFO] Cookies Safari ({browser}) : {cookies_file}")
             return
 
         conn = sqlite3.connect(cookies_file)
         cursor = conn.cursor()
-        print(f"Analyzing cookies ({browser}): {cookies_file}")
+        print(f"[INFO] Analyzing cookies ({browser}): {cookies_file}")
 
         if browser in ['chrome', 'edge', 'opera', 'firefox']:
             cursor.execute("SELECT host_key, name, value FROM cookies")
@@ -117,7 +117,7 @@ def analyze_cookies_file(cookies_file, social_media_domains, results, browser):
                     })
         conn.close()
     except Exception as e:
-        print(f"Error ({browser}): {cookies_file}, {e}")
+        print(f"[ERROR] Error ({browser}): {cookies_file}, {e}")
 
 
 def count_hosts_by_browser(results):

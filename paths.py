@@ -13,7 +13,7 @@ def get_path(partition, extensions=[".txt"], skip_system_paths=True):
         "/usr", "/boot", "/etc"  # Linux
     ]
 
-    print(f"Searching in the partition: {partition}")
+    print(f"[INFO] Searching in the partition: {partition}")
 
     for root, dirs, files in os.walk(partition):
         if skip_system_paths and any(root.startswith(path) for path in system_paths):
