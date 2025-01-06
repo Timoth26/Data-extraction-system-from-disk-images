@@ -10,13 +10,16 @@ def get_path(partition, extensions=[".txt"], skip_system_paths=True):
     system_paths = [
         "/proc", "/sys", "/dev", "/run", "/var/lib", "/var/run",  # Linux
         "C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)",  # Windows
-        "/usr", "/boot", "/etc"  # Linux
+        "/usr", "/boot", "/etc",  # Linux
     ]
 
     print(f"[INFO] Searching in the partition: {partition}")
 
     for root, dirs, files in os.walk(partition):
-        if skip_system_paths and any(root.startswith(path) for path in system_paths):
+        root = root.replace("\\", "/")
+
+        if skip_system_paths and any(system_path in root for system_path in system_paths):
+            print(f"[INFO] Skipping system path: {root}")
             continue
 
         for file in files:
