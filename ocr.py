@@ -16,5 +16,4 @@ def ocr(image_path):
         results = reader.readtext(temp_file_path)
 
     extracted_text = " ".join([result[1] for result in results])
-    print(extracted_text)
     return extracted_text

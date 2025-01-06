@@ -132,6 +132,6 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
 
         # Save the PDF file
         pdf.save()
-        print(f"PDF report saved at {output_path}")
+        print(f"[INFO] PDF report saved at {output_path}")
     except Exception as e:
-        print(f"An error occurred while generating the PDF report: {e}")
+        print(f"[ERROR] An error occurred while generating the PDF report: {e}")

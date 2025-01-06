@@ -16,13 +16,13 @@ def search_emails_in_files(file_paths, output_file):
         found_emails = set()
         try:
             if file_extension in ["txt", "log", "eml"]:
-                # Pliki tekstowe
+                # Text files
                 with open(file_path, 'r', errors='ignore') as f:
                     content = f.read()
                     found_emails = set(email_pattern.findall(content))
 
             elif file_extension == "csv":
-                # Pliki CSV
+                # CSV files
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     reader = csv.reader(f)
                     for row in reader:
@@ -30,47 +30,47 @@ def search_emails_in_files(file_paths, output_file):
                         found_emails.update(email_pattern.findall(line))
 
             elif file_extension == "json":
-                # Pliki JSON
+                # JSON files
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     data = json.load(f)
                     content = json.dumps(data)
                     found_emails.update(email_pattern.findall(content))
 
             elif file_extension == "xml":
-                # Pliki XML
+                # XML files
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                     found_emails.update(email_pattern.findall(content))
 
             elif file_extension == "html":
-                # Pliki HTML
+                # HTML files
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                     found_emails.update(email_pattern.findall(content))
 
             elif file_extension == "pdf":
-                # Pliki PDF
+                # PDF files
                 with pdfplumber.open(file_path) as pdf:
                     for page in pdf.pages:
                         content = page.extract_text() or ""
                         found_emails.update(email_pattern.findall(content))
 
             elif file_extension == "eml":
-                # Pliki EML
+                # EML files
                 with open(file_path, 'r', errors='ignore') as f:
                     msg = message_from_file(f)
                     content = msg.as_string()
                     found_emails.update(email_pattern.findall(content))
 
             elif file_extension == "mbox":
-                # Pliki MBOX
+                # MBOX files
                 mbox = mailbox.mbox(file_path)
                 for message in mbox:
                     content = message.as_string()
                     found_emails.update(email_pattern.findall(content))
 
             elif file_extension in ["sqlite", "db"]:
-                # Pliki SQLite/DB
+                # SQLite/DB files
                 conn = sqlite3.connect(file_path)
                 cursor = conn.cursor()
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -88,15 +88,13 @@ def search_emails_in_files(file_paths, output_file):
                 conn.close()
 
             elif file_extension == "msg":
-                # Pliki MSG
+                # MSG files
                 with open(file_path, 'r', errors='ignore') as f:
                     content = f.read()
                     found_emails.update(email_pattern.findall(content))
 
-            # Dodaj znalezione e-maile do ogólnego zbioru
             all_found_emails.update(found_emails)
 
-            # Zapis wyników do pliku tylko jeśli znaleziono e-maile
             if found_emails:
                 with open(output_file, "a", encoding="utf-8") as result_file:
                     result_file.write(f"Analysis of file: {file_path}\n")
@@ -105,7 +103,6 @@ def search_emails_in_files(file_paths, output_file):
                     result_file.write("\n")
 
         except (IOError, OSError, json.JSONDecodeError, sqlite3.DatabaseError) as e:
-            print(f"Cannot open file: {file_path}. Error: {e}")
+            print(f"[ERROR] Cannot open file: {file_path}. Error: {e}")
 
     return all_found_emails
-
