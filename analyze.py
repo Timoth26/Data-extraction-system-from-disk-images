@@ -74,7 +74,6 @@ def analyze_file(file_path, ner_pipeline, score_threshold):
 
     except Exception as e:
         print(f"[ERROR] Exception during analysis of file {file_path}: {e}")
-        return file_path, f"Error: {e}"
 
 def analyze_files(file_paths, output_file, score_threshold=0.90, max_workers=4):
     ner_pipeline = pipeline("token-classification", model='lakshyakh93/deberta_finetuned_pii', device=-1, aggregation_strategy="simple")

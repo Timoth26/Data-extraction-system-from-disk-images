@@ -80,7 +80,7 @@ def analyze_history_file(history_file, social_media_domains, results, browser):
                     results.append({
                         "browser": browser,
                         "file": history_file,
-                        "url": row[0],
+                        "host": row[0],
                         "title": row[1] if len(row) > 1 else None,
                         "visit_count": row[2] if len(row) > 2 else None,
                         "last_visit_time": row[3] if len(row) > 3 else None
