@@ -97,6 +97,10 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 pdf.drawString(50, y_position, f"Type: {entity_group}, Found: {count}")
                 y_position -= 15
                 check_page_break()
+                
+            y_position -= 10
+            check_page_break()
+    
 
         # Add Emails section if emails are found
         email_results = list(email_results)
@@ -111,6 +115,10 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 pdf.drawString(50, y_position, email)
                 y_position -= 15
                 check_page_break()
+                
+            y_position -= 10
+            check_page_break()
+
 
         # Add Social Media section if data is found
         if social_results:
