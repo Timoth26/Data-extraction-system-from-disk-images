@@ -1,6 +1,29 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
+from textwrap import wrap
+
+def draw_wrapped_text(pdf, text, x, y, max_width, line_height=15):
+    lines = []
+    words = text.split()
+    current_line = ""
+
+    for word in words:
+        if pdf.stringWidth(current_line + " " + word, "Helvetica", 12) <= max_width:
+            current_line += " " + word if current_line else word
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    if current_line:
+        lines.append(current_line)
+
+    for line in lines:
+        pdf.drawString(x, y, line)
+        y -= line_height
+
+    return y
+
 
 def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, output_path='./results/report.pdf'):
     try:
@@ -18,131 +41,100 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 pdf.setFont("Helvetica", 12)
                 y_position = height - 50
 
+        # Title
         pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(50, y_position, "Disk Image Analysis Report for Personal Data")
-        y_position -= 30
-
+        y_position = draw_wrapped_text(pdf, "Disk Image Analysis Report for Personal Data", 50, y_position, max_width=width - 100)
+        
         pdf.setFont("Helvetica", 12)
-        pdf.drawString(50, y_position, f"Author: {author['Name']} {author['Surname']}")
-        y_position -= 20
-        pdf.drawString(50, y_position, f"Nr: {author['Nr']}")
-        y_position -= 20
-
-        pdf.drawString(50, y_position, f"Disk Image: {disk_image_name}")
-        y_position -= 20
-
-        pdf.drawString(50, y_position, f"Date and time of generation: {current_time}")
-        y_position -= 30
-
+        y_position = draw_wrapped_text(pdf, f"Author: {author['Name']} {author['Surname']}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, f"Nr: {author['Nr']}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, f"Disk Image: {disk_image_name}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, f"Date and time of generation: {current_time}", 50, y_position, max_width=width - 100)
+        
         pdf.setLineWidth(1)
         pdf.line(50, y_position, width - 50, y_position - 5)
         y_position -= 20
 
         pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, y_position, "Partition and Operating System Analysis")
-        y_position -= 20
-
+        y_position = draw_wrapped_text(pdf, "Partition and Operating System Analysis", 50, y_position, max_width=width - 100)
+        
         pdf.setFont("Helvetica", 12)
         for partition, os_info in partition_data.items():
-            pdf.drawString(50, y_position, f"Partition: {partition}")
-            y_position -= 15
+            y_position = draw_wrapped_text(pdf, f"Partition: {partition}", 50, y_position, max_width=width - 100)
             check_page_break()
 
             if isinstance(os_info, dict):
                 for key, value in os_info.items():
                     if isinstance(value, dict):
                         for key1, value1 in value.items():
-                            pdf.drawString(70, y_position, f"{key1}: {value1}")
-                            y_position -= 15
+                            y_position = draw_wrapped_text(pdf, f"{key1}: {value1}", 70, y_position, max_width=width - 120)
                             check_page_break()
                     else:
-                        pdf.drawString(70, y_position, f"{key}: {value}")
-                        y_position -= 15
+                        y_position = draw_wrapped_text(pdf, f"{key}: {value}", 70, y_position, max_width=width - 120)
                         check_page_break()
             else:
-                pdf.drawString(70, y_position, f"Operating System: {os_info}")
-                y_position -= 15
-                check_page_break()
+                y_position = draw_wrapped_text(pdf, f"Operating System: {os_info}", 70, y_position, max_width=width - 120)
 
             if partition in users:
                 user_info = users[partition]
-                pdf.drawString(70, y_position, "USERS: ")
-                y_position -= 15
+                y_position = draw_wrapped_text(pdf, "USERS: ", 70, y_position, max_width=width - 100)
                 check_page_break()
 
                 if user_info["status"] == "ok" and user_info["users"]:
                     users_str = ", ".join(user_info["users"])
-                    pdf.drawString(90, y_position, users_str)
-                    y_position -= 15
-                    check_page_break()
+                    y_position = draw_wrapped_text(pdf, users_str, 90, y_position, max_width=width - 120)
                 else:
                     message = user_info.get("message", "No users found")
-                    pdf.drawString(90, y_position, message)
-                    y_position -= 15
-                    check_page_break()
-
-                y_position -= 10
-                check_page_break()
-
+                    y_position = draw_wrapped_text(pdf, message, 90, y_position, max_width=width - 120)
 
         y_position -= 10
         check_page_break()
 
-        # Add Personal Data section if data exists
+        # Personal Data section
         if personal_data:
             pdf.setFont("Helvetica-Bold", 14)
-            pdf.drawString(50, y_position, "Personal Data Obtained")
-            y_position -= 20
-            check_page_break()
-
+            y_position = draw_wrapped_text(pdf, "Personal Data Obtained", 50, y_position, max_width=width - 100)
             pdf.setFont("Helvetica", 12)
-            for entity_group, count in personal_data.items():
-                pdf.drawString(50, y_position, f"Type: {entity_group}, Found: {count}")
-                y_position -= 15
-                check_page_break()
-                
-            y_position -= 10
-            check_page_break()
-    
 
-        # Add Emails section if emails are found
-        email_results = list(email_results)
+            for entity_group, count in personal_data.items():
+                check_page_break()
+                y_position = draw_wrapped_text(pdf, f"Type: {entity_group}, Found: {count}", 50, y_position, max_width=width - 100)
+
+        y_position -= 10
+        check_page_break()
+
+
+        # Emails section
         if email_results:
             pdf.setFont("Helvetica-Bold", 14)
-            pdf.drawString(50, y_position, "Emails Found")
-            y_position -= 20
-            check_page_break()
-
+            y_position = draw_wrapped_text(pdf, "Emails Found", 50, y_position, max_width=width - 100)
             pdf.setFont("Helvetica", 12)
             for email in sorted(email_results):
-                pdf.drawString(50, y_position, email)
-                y_position -= 15
                 check_page_break()
-                
-            y_position -= 10
-            check_page_break()
+                y_position = draw_wrapped_text(pdf, email, 50, y_position, max_width=width - 100)
 
+        y_position -= 10
+        check_page_break()
 
-        # Add Social Media section if data is found
+        # Social Media section
         if social_results:
             pdf.setFont("Helvetica-Bold", 14)
-            pdf.drawString(50, y_position, "Social Media Accounts Found")
-            y_position -= 20
-            check_page_break()
-
+            y_position = draw_wrapped_text(pdf, "Social Media Accounts Found", 50, y_position, max_width=width - 100)
             pdf.setFont("Helvetica", 12)
             for social_data in social_results:
                 if social_data:
                     for browser, hosts in social_data.items():
                         if isinstance(hosts, dict):
                             for host, count in hosts.items():
-                                pdf.drawString(50, y_position, f"Browser: {browser}, Host: {host}, Count: {count}")
-                                y_position -= 15
+                                display_host = host if len(host) <= 50 else host[:50] + "..."
+                                text = f"Browser: {browser}, Host: {display_host}, Count: {count}"
+                                
                                 check_page_break()
+                                y_position = draw_wrapped_text(pdf, text, 50, y_position, max_width=width - 100)
 
-
-        # Save the PDF file
+        # Save the PDF
         pdf.save()
         print(f"[INFO] PDF report saved at {output_path}")
     except Exception as e:
         print(f"[ERROR] An error occurred while generating the PDF report: {e}")
+        
