@@ -48,7 +48,15 @@ def main():
         action='store_true', 
         help=(
             "Enable AI-powered analysis of text-based files. "
-            "Analyzed file types include .txt, .pdf, .docx, .doc, .html, .xml, .log, .csv, and more."
+            "Analyzed file types include .txt, .pdf, .docx, .doc"
+        )
+    )
+    parser.add_argument(
+        '-x', '--extend', 
+        action='store_true', 
+        help=(
+            "Enable AI-powered analysis of more files. "
+            "Analyzed file types include additionally .html, .xml, .log, .eml, .csv, json, .pptx, .odt, .md, .msg, .epub, .db"
         )
     )
     parser.add_argument(
@@ -88,7 +96,9 @@ def main():
     extensions = []
 
     if args.analyze:
-        extensions.extend(['.txt', '.pdf', '.docx', '.doc', '.html', '.xml', '.log', '.eml', '.csv', 'json', '.pptx', '.odt', '.md', '.msg', '.epub', '.db'])
+        extensions.extend(['.txt', '.pdf', '.docx', '.doc'])
+    if args.extend:
+        extensions.extend(['.html', '.xml', '.log', '.eml', '.csv', 'json', '.pptx', '.odt', '.md', '.msg', '.epub', '.db'])
     if args.ocr:
         extensions.extend(['.png', '.jpeg', '.jpg'])
 
@@ -103,11 +113,21 @@ def main():
     os_results = {}
     users = {}
     email_results = set()
-    analyze_results = []
+    analyze_results = {}
     social_results = []
     
     if not os.path.exists('./results'):
         os.makedirs('./results')
+
+    files_to_remove = [
+        f"./results/analyze_results_{author['Nr']}.txt",
+        f"./results/email_results_{author['Nr']}.txt",
+        f"./results/social_results_{author['Nr']}.txt",
+    ]
+
+    for file_path in files_to_remove:
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
 
     for partition in disk.mount_points:
@@ -137,7 +157,7 @@ def main():
 
         if args.analyze or args.ocr:
             print("[INFO] Starting file analysis...")
-            analyze_results.append(analyze_files(paths, f"./results/analyze_results_{author['Nr']}.txt"))
+            analyze_results.update(analyze_files(paths, f"./results/analyze_results_{author['Nr']}.txt"))
 
         if args.emails:
             print("[INFO] Searching for email addresses...")
