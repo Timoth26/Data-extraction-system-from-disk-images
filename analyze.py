@@ -81,7 +81,7 @@ def analyze_files(file_paths, output_file, score_threshold=0.90, max_workers=4):
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {executor.submit(analyze_file, file_path, ner_pipeline, score_threshold): file_path for file_path in file_paths}
-        with open(output_file, "w", encoding="utf-8") as result_file:
+        with open(output_file, "a", encoding="utf-8") as result_file:
             for future in as_completed(future_to_file):
                 file_path = future_to_file[future]
                 try:
@@ -202,7 +202,8 @@ def count_entities(results):
     if results:
         entity_groups = []
         for key, value in results.items():
-            entity_groups.extend([item['entity_group'] for item in value])
+            if value and isinstance(value, list):
+                entity_groups.extend([item['entity_group'] for item in value])
         
         entity_group_counts = Counter(entity_groups)
         return dict(entity_group_counts)
