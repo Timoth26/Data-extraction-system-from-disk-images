@@ -52,7 +52,7 @@ def extract_social_media_data(partition_path, output_file='social_media_analysis
                 if file in file_types['cookies']:
                     analyze_cookies_file(os.path.join(root, file), social_media_domains, results, browser)
 
-    with open(output_file, 'w') as f:
+    with open(output_file, 'a') as f:
         for result in results:
             f.write(str(result) + '\n')
     
