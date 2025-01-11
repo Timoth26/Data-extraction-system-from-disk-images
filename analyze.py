@@ -12,7 +12,7 @@ import zipfile
 import sqlite3
 from email import message_from_file
 import ebooklib
-
+import shutil
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
@@ -56,7 +56,7 @@ def analyze_file(file_path, ner_pipeline, score_threshold):
         elif file_path.lower().endswith(".epub"):
             print(f"[INFO] Extracting text from EPUB: {file_path}")
             text = extract_text_from_epub(file_path)
-        elif file_path.lower().endswith(".db"):
+        elif file_path.lower().endswith(".db") or file_path.lower().endswith(".sqlite"):
             print(f"[INFO] Extracting text from Database: {file_path}")
             text = extract_text_from_db(file_path)
         elif file_path.lower().endswith((".png", ".jpeg", ".jpg")):
@@ -184,18 +184,33 @@ def extract_text_from_epub(epub_path):
     return text
 
 def extract_text_from_db(db_path):
+    temp_folder = './temp'
+    os.makedirs(temp_folder, exist_ok=True)
+
+    db_name = os.path.basename(db_path)
+    db_copy_path = os.path.join(temp_folder, db_name)
+
+    shutil.copy(db_path, db_copy_path)
+
+    os.chmod(db_copy_path, 0o555)
+
     text = ""
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_copy_path)
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
+
     for table in tables:
         table_name = table[0]
         cursor.execute(f"SELECT * FROM {table_name}")
         rows = cursor.fetchall()
         for row in rows:
             text += " ".join(str(col) for col in row) + "\n"
+
     conn.close()
+
+    os.remove(db_copy_path)
+
     return text
 
 def count_entities(results):

@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import shutil
 
 def extract_social_media_data(partition_path, output_file='social_media_analysis.txt'):
 
@@ -61,9 +62,19 @@ def extract_social_media_data(partition_path, output_file='social_media_analysis
 
 def analyze_history_file(history_file, social_media_domains, results, browser):
     try:
-        conn = sqlite3.connect(history_file)
+        temp_folder = './temp'
+        os.makedirs(temp_folder, exist_ok=True)
+
+        history_file_name = os.path.basename(history_file)
+        history_file_copy = os.path.join(temp_folder, history_file_name)
+
+        shutil.copy(history_file, history_file_copy)
+
+        os.chmod(history_file_copy, 0o555)
+
+        conn = sqlite3.connect(history_file_copy)
         cursor = conn.cursor()
-        print(f"[INFO] Analyzing ({browser}): {history_file}")
+        print(f"[INFO] Analyzing ({browser}): {history_file_copy}")
 
         if browser in ['chrome', 'edge', 'opera']:
             cursor.execute("SELECT url, title, visit_count, last_visit_time FROM urls")
@@ -86,19 +97,32 @@ def analyze_history_file(history_file, social_media_domains, results, browser):
                         "last_visit_time": row[3] if len(row) > 3 else None
                     })
         conn.close()
+
+        os.remove(history_file_copy)
+
     except Exception as e:
         print(f"[ERROR] Error: ({browser}): {history_file}, {e}")
 
 
 def analyze_cookies_file(cookies_file, social_media_domains, results, browser):
     try:
-        if browser == 'safari' and cookies_file.endswith('.binarycookies'):
-            print(f"[INFO] Cookies Safari ({browser}) : {cookies_file}")
+        temp_folder = './temp'
+        os.makedirs(temp_folder, exist_ok=True)
+
+        cookies_file_name = os.path.basename(cookies_file)
+        cookies_file_copy = os.path.join(temp_folder, cookies_file_name)
+
+        shutil.copy(cookies_file, cookies_file_copy)
+
+        os.chmod(cookies_file_copy, 0o555)
+
+        if browser == 'safari' and cookies_file_copy.endswith('.binarycookies'):
+            print(f"[INFO] Cookies Safari ({browser}) : {cookies_file_copy}")
             return
 
-        conn = sqlite3.connect(cookies_file)
+        conn = sqlite3.connect(cookies_file_copy)
         cursor = conn.cursor()
-        print(f"[INFO] Analyzing cookies ({browser}): {cookies_file}")
+        print(f"[INFO] Analyzing cookies ({browser}): {cookies_file_copy}")
 
         if browser in ['chrome', 'edge', 'opera', 'firefox']:
             cursor.execute("SELECT host_key, name, value FROM cookies")
@@ -116,6 +140,9 @@ def analyze_cookies_file(cookies_file, social_media_domains, results, browser):
                         "cookie_value": row[2]
                     })
         conn.close()
+
+        os.remove(cookies_file_copy)
+
     except Exception as e:
         print(f"[ERROR] Error ({browser}): {cookies_file}, {e}")
 
