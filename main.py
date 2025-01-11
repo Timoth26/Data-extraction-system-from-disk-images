@@ -6,6 +6,7 @@ from analyze import analyze_files, count_entities
 from generate_report import generate_pdf_report
 from email_finder import search_emails_in_files
 from social_analyze import extract_social_media_data
+from datetime import datetime
 
 def main():
     parser = argparse.ArgumentParser(
@@ -56,7 +57,7 @@ def main():
         action='store_true', 
         help=(
             "Enable AI-powered analysis of more files. "
-            "Analyzed file types include additionally .html, .xml, .log, .eml, .csv, json, .pptx, .odt, .md, .msg, .epub, .db"
+            "Analyzed file types include additionally .html, .xml, .log, .eml, .csv, json, .pptx, .odt, .md, .msg, .epub, .db, .sqlite"
         )
     )
     parser.add_argument(
@@ -98,7 +99,7 @@ def main():
     if args.analyze:
         extensions.extend(['.txt', '.pdf', '.docx', '.doc'])
     if args.extend:
-        extensions.extend(['.html', '.xml', '.log', '.eml', '.csv', 'json', '.pptx', '.odt', '.md', '.msg', '.epub', '.db'])
+        extensions.extend(['.html', '.xml', '.log', '.eml', '.csv', 'json', '.pptx', '.odt', '.md', '.msg', '.epub', '.db', 'sqlite'])
     if args.ocr:
         extensions.extend(['.png', '.jpeg', '.jpg'])
 
@@ -129,6 +130,7 @@ def main():
         if os.path.exists(file_path):
             os.remove(file_path)
 
+    start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for partition in disk.mount_points:
         print(f"[INFO] Processing partition: {partition}")
@@ -176,7 +178,8 @@ def main():
         email_results,
         social_results,
         author,
-        output_path=f"./results/report_{author['Nr']}.pdf"
+        output_path=f"./results/report_{author['Nr']}.pdf",
+        start_time=start_time
     )
 
     print("[INFO] Cleaning up disk mounts...")
