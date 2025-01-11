@@ -3,13 +3,15 @@ from reportlab.pdfgen import canvas
 from datetime import datetime
 from textwrap import wrap
 
-def draw_wrapped_text(pdf, text, x, y, max_width, line_height=15):
+def draw_wrapped_text(pdf, text, x, y, max_width, font_name="Helvetica", font_size=12, line_height=15):
+    pdf.setFont(font_name, font_size)
+
     lines = []
     words = text.split()
     current_line = ""
 
     for word in words:
-        if pdf.stringWidth(current_line + " " + word, "Helvetica", 12) <= max_width:
+        if pdf.stringWidth(current_line + " " + word, font_name, font_size) <= max_width:
             current_line += " " + word if current_line else word
         else:
             lines.append(current_line)
@@ -25,7 +27,8 @@ def draw_wrapped_text(pdf, text, x, y, max_width, line_height=15):
     return y
 
 
-def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, output_path='./results/report.pdf'):
+def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, 
+                        output_path='./results/report.pdf', start_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
     try:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -49,10 +52,18 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
         y_position = draw_wrapped_text(pdf, f"Author: {author['Name']} {author['Surname']}", 50, y_position, max_width=width - 100)
         y_position = draw_wrapped_text(pdf, f"Nr: {author['Nr']}", 50, y_position, max_width=width - 100)
         y_position = draw_wrapped_text(pdf, f"Disk Image: {disk_image_name}", 50, y_position, max_width=width - 100)
-        y_position = draw_wrapped_text(pdf, f"Date and time of generation: {current_time}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, f"Date and time of start analysis: {start_time}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, f"Date and time of end analysis and report generation: {current_time}", 50, y_position, max_width=width - 100)
+        y_position = draw_wrapped_text(pdf, "The system performs data analysis by extracting information from documents.\
+                                       The detection of personal data is carried out using the NER model lakshyakh93/deberta_finetuned_pii, \
+                                       which identifies sensitive information such as names, email addresses, or phone numbers. Additionally, \
+                                       user activity is analyzed by searching browsing history and cookie files to identify visited social media \
+                                       websites. The system also enables text extraction from images in .png and .jpg formats by leveraging OCR \
+                                       technology using EasyOCR and OpenCV. All analytical operations are conducted on a copy of the disk image, \
+                                       mounted in read-only mode, ensuring data integrity throughout the entire process.", 50, y_position, max_width=width - 100, font_size=8, line_height=10)
         
         pdf.setLineWidth(1)
-        pdf.line(50, y_position, width - 50, y_position - 5)
+        pdf.line(50, y_position-5, width - 50, y_position - 5)
         y_position -= 20
 
         pdf.setFont("Helvetica-Bold", 14)
