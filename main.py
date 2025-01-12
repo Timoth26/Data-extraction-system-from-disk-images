@@ -187,12 +187,12 @@ def main():
     print("[INFO] Cookies analysis...")
     cookies_summary = {}
     for social_result in social_results:
-        analyze_cookies([social_result])
+        analyze_cookies([social_result], author['Nr'])
 
         for browser, hosts in social_result.items():
             cookies_summary[browser] = cookies_summary.get(browser, 0) + sum(hosts.values())
         
-        statistics["images"]=["browser_cookies.png", "host_cookies.png"]
+        statistics["images"]=[f"./results/browser_cookies_{author['Nr']}.png", f"./results/host_cookies_{author['Nr']}.png"]
     statistics["cookies"] = cookies_summary
 
 
@@ -208,13 +208,13 @@ def main():
         statistics["domains"] = domain_counts
         
         domain_lengths = [len(domain) for domain in domains_all]
-        plot_histogram(domain_lengths, "Domain length distribution", "Domain length", "Number of occurrences", "domain_length_distribution.png")
+        plot_histogram(domain_lengths, "Domain length distribution", "Domain length", "Number of occurrences", f"./results/domain_length_distribution_{author['Nr']}.png")
 
 
         # Tworzenie wykresów
-        plot_bar_chart(email_counts, "Most common email addresses", "Email address", "Number of occurrences", "top_emails.png")
-        plot_bar_chart(domain_counts, "Most common domains", "Domain", "Number of occurrences", "top_domains.png")
-        statistics["images"].extend(["top_emails.png", "top_domains.png","domain_length_distribution.png"])
+        plot_bar_chart(email_counts, "Most common email addresses", "Email address", "Number of occurrences", f"./results/top_emails_{author['Nr']}.png")
+        plot_bar_chart(domain_counts, "Most common domains", "Domain", "Number of occurrences", f"./results/top_domains_{author['Nr']}.png")
+        statistics["images"].extend([f"./results/top_emails_{author['Nr']}.png", f"./results/top_domains_{author['Nr']}.png",f"./results/domain_length_distribution_{author['Nr']}.png"])
         
     
     print("[INFO] Generating final report...")

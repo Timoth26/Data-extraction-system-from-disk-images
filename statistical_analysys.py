@@ -34,7 +34,7 @@ def plot_histogram(data, title, xlabel, ylabel, filename):
     plt.tight_layout()
     plt.savefig(filename)
     
-def analyze_cookies(cookie_data):
+def analyze_cookies(cookie_data,number):
     browser_counts = Counter()
     host_counts = Counter()
 
@@ -48,9 +48,9 @@ def analyze_cookies(cookie_data):
     host_data = host_counts.most_common()
 
     plot_bar_chart(browser_data, "Number of cookies per browser", 
-                   "Browser", "Number of cookies", "browser_cookies.png")
+                   "Browser", "Number of cookies", f"./results/browser_cookies_{number}.png")
     plot_bar_chart(host_data, "Number of cookies per host", 
-                   "Host", "Number of cookies", "host_cookies.png")
+                   "Host", "Number of cookies", f"./results/host_cookies_{number}.png")
 
 
 # Funkcja do generowania raportu PDF
