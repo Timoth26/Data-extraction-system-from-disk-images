@@ -62,6 +62,19 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                                        technology using EasyOCR and OpenCV. All analytical operations are conducted on a copy of the disk image, \
                                        mounted in read-only mode, ensuring data integrity throughout the entire process.", 50, y_position, max_width=width - 100, font_size=8, line_height=10)
         
+                
+        #Device technical data
+        if tech_info:
+            pdf.setFont("Helvetica-Bold", 14)
+            y_position = draw_wrapped_text(pdf, "Device technical data", 50, y_position, max_width=width - 100)
+            pdf.setFont("Helvetica", 12)
+            for key, value in tech_info.items():
+                y_position = draw_wrapped_text(pdf, f"{key}: {value}", 50, y_position, max_width=width - 100)
+                check_page_break()
+            pdf.line(50, y_position - 5, width - 50, y_position - 5)
+            y_position -= 20
+        y_position -= 10
+        check_page_break()
         pdf.setLineWidth(1)
         pdf.line(50, y_position-5, width - 50, y_position - 5)
         y_position -= 20
@@ -97,19 +110,6 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 else:
                     message = user_info.get("message", "No users found")
                     y_position = draw_wrapped_text(pdf, message, 90, y_position, max_width=width - 120)
-        
-        #Device technical data
-        if tech_info:
-            pdf.setFont("Helvetica-Bold", 14)
-            y_position = draw_wrapped_text(pdf, "Device technical data", 50, y_position, max_width=width - 100)
-            pdf.setFont("Helvetica", 12)
-            for key, value in tech_info.items():
-                y_position = draw_wrapped_text(pdf, f"{key}: {value}", 50, y_position, max_width=width - 100)
-                check_page_break()
-            pdf.line(50, y_position - 5, width - 50, y_position - 5)
-            y_position -= 20
-        y_position -= 10
-        check_page_break()
 
         # Personal Data section
         if personal_data:
@@ -153,10 +153,15 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
         pdf.showPage()
         pdf.setFont("Helvetica-Bold", 14)
         pdf.drawString(50, height - 50, "Statistical visualizations:")
-        for image in statistics.get("images", []):
-            pdf.drawImage(image, 50, height - 250, width=500, height=200)
+        images = statistics.get("images", [])
+
+        for i in range(0, len(images), 2):
             pdf.showPage()
 
+            pdf.drawImage(images[i], 50, height - 250, width=500, height=200)
+
+            if i + 1 < len(images):
+                pdf.drawImage(images[i + 1], 50, height - 500, width=500, height=200)
 
         # Emails section
         if email_results:

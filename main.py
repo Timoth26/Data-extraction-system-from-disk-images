@@ -6,7 +6,7 @@ from analyze import analyze_files, count_entities
 from generate_report import generate_pdf_report
 from email_finder import search_emails_in_files
 from social_analyze import extract_social_media_data
-from statistical_analysys import analyze_cookies, extract_emails_and_domains, plot_bar_chart
+from statistical_analysys import analyze_cookies, extract_emails_and_domains, plot_bar_chart, plot_histogram
 from datetime import datetime
 from collections import Counter
 
@@ -191,23 +191,32 @@ def main():
 
         for browser, hosts in social_result.items():
             cookies_summary[browser] = cookies_summary.get(browser, 0) + sum(hosts.values())
-
+        
+        statistics["images"]=["browser_cookies.png", "host_cookies.png"]
     statistics["cookies"] = cookies_summary
 
 
-    if email_results:
+    if email_results and analyze_results:
         print("[INFO] Email and domain analysis...")
-        emails, domains = extract_emails_and_domains("\n".join(email_results))
-        email_counts = Counter(emails).most_common(10)
-        domain_counts = Counter(domains).most_common(10)
+        emails_email, domains_email = extract_emails_and_domains("\n".join(email_results))
+        emails_analyze, domains_analyze = extract_emails_and_domains("\n".join(analyze_results))
+        emails_all = emails_email + emails_analyze
+        domains_all = domains_email + domains_analyze
+        email_counts = Counter(emails_all).most_common(10)
+        domain_counts = Counter(domains_all).most_common(10)
         statistics["emails"] = email_counts
         statistics["domains"] = domain_counts
+        
+        domain_lengths = [len(domain) for domain in domains_all]
+        plot_histogram(domain_lengths, "Domain length distribution", "Domain length", "Number of occurrences", "domain_length_distribution.png")
+
 
         # Tworzenie wykresów
         plot_bar_chart(email_counts, "Most common email addresses", "Email address", "Number of occurrences", "top_emails.png")
         plot_bar_chart(domain_counts, "Most common domains", "Domain", "Number of occurrences", "top_domains.png")
-        statistics["images"] = ["top_emails.png", "top_domains.png"]
+        statistics["images"].extend(["top_emails.png", "top_domains.png","domain_length_distribution.png"])
         
+    
     print("[INFO] Generating final report...")
     generate_pdf_report(
         os_results,
