@@ -6,7 +6,7 @@ from analyze import analyze_files, count_entities
 from generate_report import generate_pdf_report
 from email_finder import search_emails_in_files
 from social_analyze import extract_social_media_data
-from statistical_analyzys import analyze_cookies, extract_emails_and_domains, plot_bar_chart
+from statistical_analysys import analyze_cookies, extract_emails_and_domains, plot_bar_chart
 from datetime import datetime
 from collections import Counter
 
@@ -184,14 +184,15 @@ def main():
             print("[INFO] Extracting social media data...")
             social_results.append(extract_social_media_data(partition, f"./results/social_results_{author['Nr']}.txt"))
 
-    if args.social:
-        print("[INFO] Cookies analysis...")
-        cookies_summary = {}
-        for social_result in social_results:
-            analyze_cookies(social_result)
-            for entry in social_result:
-                cookies_summary[entry["browser"]] = cookies_summary.get(entry["browser"], 0) + 1
-        statistics["cookies"] = cookies_summary
+    print("[INFO] Cookies analysis...")
+    cookies_summary = {}
+    for social_result in social_results:
+        analyze_cookies([social_result])
+
+        for browser, hosts in social_result.items():
+            cookies_summary[browser] = cookies_summary.get(browser, 0) + sum(hosts.values())
+
+    statistics["cookies"] = cookies_summary
 
 
     if email_results:
