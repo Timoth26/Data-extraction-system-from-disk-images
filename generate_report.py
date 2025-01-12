@@ -54,16 +54,6 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
         y_position = draw_wrapped_text(pdf, f"Disk Image: {disk_image_name}", 50, y_position, max_width=width - 100)
         y_position = draw_wrapped_text(pdf, f"Date and time of start analysis: {start_time}", 50, y_position, max_width=width - 100)
         y_position = draw_wrapped_text(pdf, f"Date and time of end analysis and report generation: {current_time}", 50, y_position, max_width=width - 100)
-        y_position = draw_wrapped_text(pdf, "The system performs data analysis by extracting information from documents.\
-                                       The detection of personal data is carried out using the NER model lakshyakh93/deberta_finetuned_pii, \
-                                       which identifies sensitive information such as names, email addresses, or phone numbers. Additionally, \
-                                       user activity is analyzed by searching browsing history and cookie files to identify visited social media \
-                                       websites. The system also enables text extraction from images in .png and .jpg formats by leveraging OCR \
-                                       technology using EasyOCR and OpenCV. All analytical operations are conducted on a copy of the disk image, \
-                                       mounted in read-only mode, ensuring data integrity throughout the entire process.", 50, y_position, max_width=width - 100, font_size=8, line_height=10)
-        
-                
-        #Device technical data
         if tech_info:
             pdf.setFont("Helvetica-Bold", 14)
             y_position = draw_wrapped_text(pdf, "Device technical data", 50, y_position, max_width=width - 100)
@@ -73,6 +63,15 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 check_page_break()
             pdf.line(50, y_position - 5, width - 50, y_position - 5)
             y_position -= 20
+        y_position = draw_wrapped_text(pdf, "The system performs data analysis by extracting information from documents.\
+                                       The detection of personal data is carried out using the NER model lakshyakh93/deberta_finetuned_pii, \
+                                       which identifies sensitive information such as names, email addresses, or phone numbers. Additionally, \
+                                       user activity is analyzed by searching browsing history and cookie files to identify visited social media \
+                                       websites. The system also enables text extraction from images in .png and .jpg formats by leveraging OCR \
+                                       technology using EasyOCR and OpenCV. All analytical operations are conducted on a copy of the disk image, \
+                                       mounted in read-only mode, ensuring data integrity throughout the entire process.", 50, y_position, max_width=width - 100, font_size=8, line_height=10)
+        
+
         y_position -= 10
         check_page_break()
         pdf.setLineWidth(1)
@@ -110,6 +109,9 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 else:
                     message = user_info.get("message", "No users found")
                     y_position = draw_wrapped_text(pdf, message, 90, y_position, max_width=width - 120)
+        
+        y_position -= 10
+        check_page_break()
 
         # Personal Data section
         if personal_data:
@@ -137,10 +139,13 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                         y_position = draw_wrapped_text(pdf, f"  - {email}: {count}", 70, y_position, max_width=width - 100)
                     check_page_break()
 
+                    y_position -= 15
+
                     y_position = draw_wrapped_text(pdf, "The most common domains:", 50, y_position, max_width=width - 100)
                     for domain, count in statistics["domains"]:
                         y_position = draw_wrapped_text(pdf, f"  - {domain}: {count}", 70, y_position, max_width=width - 100)
                     check_page_break()
+                    y_position -= 15
 
                 # Ciasteczka
                 if "cookies" in statistics:
@@ -148,20 +153,25 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                     for browser, count in statistics["cookies"].items():
                         y_position = draw_wrapped_text(pdf, f"  - {browser}: {count} cookies", 70, y_position, max_width=width - 100)
                     check_page_break()
+                    y_position -= 15
 
-        # Dodanie obrazów statystycznych
+        # Statistical images section
         pdf.showPage()
         pdf.setFont("Helvetica-Bold", 14)
         pdf.drawString(50, height - 50, "Statistical visualizations:")
         images = statistics.get("images", [])
 
         for i in range(0, len(images), 2):
-            pdf.showPage()
+            if y_position - 200 < 50:
+                pdf.showPage()
+                y_position = height - 50
 
-            pdf.drawImage(images[i], 50, height - 250, width=500, height=200)
+            pdf.drawImage(images[i], 50, y_position - 250, width=width / 2 - 50, height=200)
+            y_position -= 250
 
             if i + 1 < len(images):
-                pdf.drawImage(images[i + 1], 50, height - 500, width=500, height=200)
+                pdf.drawImage(images[i + 1], width / 2 + 50, y_position - 250, width=width / 2 - 50, height=200)
+                y_position -= 250  
 
         # Emails section
         if email_results:

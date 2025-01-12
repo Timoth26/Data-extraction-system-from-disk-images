@@ -140,20 +140,19 @@ def detect_users(partition_path, os_type):
 
 def gather_technical_info(partition_path):
     technical_info = {
-        "System operacyjny": platform.system(),
-        "Wersja OS": platform.version(),
-        "Architektura": platform.architecture()[0],
-        "Procesor": platform.processor(),
+        "Operating system": platform.system(),
+        "OS version": platform.version(),
+        "Architecture": platform.architecture()[0],
+        "Processor": platform.processor(),
     }
 
     try:
-        # Informacje o systemie plików
         output = subprocess.check_output(['df', '-T', partition_path], encoding='utf-8')
         filesystem_info = output.splitlines()[1].split()
         technical_info["File system"] = filesystem_info[1]
         technical_info["Partition size"] = filesystem_info[2] + " KB"
         technical_info["Free space"] = filesystem_info[4] + " KB"
     except Exception as e:
-        technical_info["File system"] = f"Nie udało się pobrać informacji: {e}"
+        technical_info["File system"] = f"Failed to retrieve information: {e}"
 
     return technical_info
