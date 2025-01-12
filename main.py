@@ -1,12 +1,14 @@
 import argparse
 import os
 from mount_disc import DiskImageManager
-from paths import get_path, detect_operating_system, detect_users
+from paths import get_path, detect_operating_system, detect_users,gather_technical_info
 from analyze import analyze_files, count_entities
 from generate_report import generate_pdf_report
 from email_finder import search_emails_in_files
 from social_analyze import extract_social_media_data
+from statistical_analyzys import analyze_cookies, extract_emails_and_domains, plot_bar_chart
 from datetime import datetime
+from collections import Counter
 
 def main():
     parser = argparse.ArgumentParser(
@@ -92,9 +94,15 @@ def main():
             "By default, system directories are excluded for efficiency."
         )
     )
+    parser.add_argument(
+        '-t','--tech_info', 
+        action='store_true', 
+        help="Enables the collection of technical data about the file system and device configuration."
+    )
     args = parser.parse_args()
     
     extensions = []
+    
 
     if args.analyze:
         extensions.extend(['.txt', '.pdf', '.docx', '.doc'])
@@ -116,7 +124,8 @@ def main():
     email_results = set()
     analyze_results = {}
     social_results = []
-    
+    statistics = {}
+
     if not os.path.exists('./results'):
         os.makedirs('./results')
 
@@ -154,6 +163,12 @@ def main():
 
         os_results[partition] = os_system
 
+        if args.tech_info:
+            print("[INFO] Technical data collection...")
+            tech_info = gather_technical_info(partition)
+        else:
+            tech_info = None
+
         print("[INFO] Searching for files...")
         paths = get_path(partition, extensions, args.sys_dir_analysis)
 
@@ -169,6 +184,29 @@ def main():
             print("[INFO] Extracting social media data...")
             social_results.append(extract_social_media_data(partition, f"./results/social_results_{author['Nr']}.txt"))
 
+    if args.social:
+        print("[INFO] Cookies analysis...")
+        cookies_summary = {}
+        for social_result in social_results:
+            analyze_cookies(social_result)
+            for entry in social_result:
+                cookies_summary[entry["browser"]] = cookies_summary.get(entry["browser"], 0) + 1
+        statistics["cookies"] = cookies_summary
+
+
+    if email_results:
+        print("[INFO] Email and domain analysis...")
+        emails, domains = extract_emails_and_domains("\n".join(email_results))
+        email_counts = Counter(emails).most_common(10)
+        domain_counts = Counter(domains).most_common(10)
+        statistics["emails"] = email_counts
+        statistics["domains"] = domain_counts
+
+        # Tworzenie wykresów
+        plot_bar_chart(email_counts, "Most common email addresses", "Email address", "Number of occurrences", "top_emails.png")
+        plot_bar_chart(domain_counts, "Most common domains", "Domain", "Number of occurrences", "top_domains.png")
+        statistics["images"] = ["top_emails.png", "top_domains.png"]
+        
     print("[INFO] Generating final report...")
     generate_pdf_report(
         os_results,
@@ -178,6 +216,8 @@ def main():
         email_results,
         social_results,
         author,
+        tech_info=tech_info,
+        statistics=statistics,
         output_path=f"./results/report_{author['Nr']}.pdf",
         start_time=start_time
     )
