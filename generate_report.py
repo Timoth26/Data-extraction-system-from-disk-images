@@ -155,23 +155,15 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                     check_page_break()
                     y_position -= 15
 
-        # Statistical images section
-        pdf.showPage()
-        pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, height - 50, "Statistical visualizations:")
+
         images = statistics.get("images", [])
 
         for i in range(0, len(images), 2):
-            if y_position - 200 < 50:
-                pdf.showPage()
-                y_position = height - 50
-
-            pdf.drawImage(images[i], 50, y_position - 250, width=width / 2 - 50, height=200)
-            y_position -= 250
+            pdf.showPage()
+            pdf.drawImage(images[i], 50, height - 250, width=width / 2 - 50, height=200)
 
             if i + 1 < len(images):
-                pdf.drawImage(images[i + 1], width / 2 + 50, y_position - 250, width=width / 2 - 50, height=200)
-                y_position -= 250  
+                pdf.drawImage(images[i + 1], width / 2 + 50, height - 250, width=width / 2 - 50, height=200)
 
         # Emails section
         if email_results:
