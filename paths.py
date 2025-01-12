@@ -1,8 +1,7 @@
 import os
 import subprocess
 import plistlib
-
-import os
+import platform
 
 def get_path(partition, extensions=[".txt"], skip_system_paths=True):
     file_paths = []
@@ -137,3 +136,24 @@ def detect_users(partition_path, os_type):
         users_info["message"] = f"Failed to detect users: {e}"
 
     return users_info
+
+
+def gather_technical_info(partition_path):
+    technical_info = {
+        "System operacyjny": platform.system(),
+        "Wersja OS": platform.version(),
+        "Architektura": platform.architecture()[0],
+        "Procesor": platform.processor(),
+    }
+
+    try:
+        # Informacje o systemie plików
+        output = subprocess.check_output(['df', '-T', partition_path], encoding='utf-8')
+        filesystem_info = output.splitlines()[1].split()
+        technical_info["File system"] = filesystem_info[1]
+        technical_info["Partition size"] = filesystem_info[2] + " KB"
+        technical_info["Free space"] = filesystem_info[4] + " KB"
+    except Exception as e:
+        technical_info["File system"] = f"Nie udało się pobrać informacji: {e}"
+
+    return technical_info

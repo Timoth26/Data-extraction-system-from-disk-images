@@ -27,7 +27,7 @@ def draw_wrapped_text(pdf, text, x, y, max_width, font_name="Helvetica", font_si
     return y
 
 
-def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, 
+def generate_pdf_report(partition_data, users, disk_image_name, personal_data, email_results, social_results, author, tech_info=None,  statistics=None,
                         output_path='./results/report.pdf', start_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
     try:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -97,7 +97,17 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
                 else:
                     message = user_info.get("message", "No users found")
                     y_position = draw_wrapped_text(pdf, message, 90, y_position, max_width=width - 120)
-
+        
+        #Device technical data
+        if tech_info:
+            pdf.setFont("Helvetica-Bold", 14)
+            y_position = draw_wrapped_text(pdf, "Device technical data", 50, y_position, max_width=width - 100)
+            pdf.setFont("Helvetica", 12)
+            for key, value in tech_info.items():
+                y_position = draw_wrapped_text(pdf, f"{key}: {value}", 50, y_position, max_width=width - 100)
+                check_page_break()
+            pdf.line(50, y_position - 5, width - 50, y_position - 5)
+            y_position -= 20
         y_position -= 10
         check_page_break()
 
@@ -113,6 +123,39 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
 
         y_position -= 10
         check_page_break()
+
+        #Statistics section
+        if statistics:
+                pdf.setFont("Helvetica-Bold", 14)
+                y_position = draw_wrapped_text(pdf, "Statistics of collected data", 50, y_position, max_width=width - 100)
+                pdf.setFont("Helvetica", 12)
+
+                # E-maile i domeny
+                if "emails" in statistics and "domains" in statistics:
+                    y_position = draw_wrapped_text(pdf, "Most common email addresses:", 50, y_position, max_width=width - 100)
+                    for email, count in statistics["emails"]:
+                        y_position = draw_wrapped_text(pdf, f"  - {email}: {count}", 70, y_position, max_width=width - 100)
+                    check_page_break()
+
+                    y_position = draw_wrapped_text(pdf, "The most common domains:", 50, y_position, max_width=width - 100)
+                    for domain, count in statistics["domains"]:
+                        y_position = draw_wrapped_text(pdf, f"  - {domain}: {count}", 70, y_position, max_width=width - 100)
+                    check_page_break()
+
+                # Ciasteczka
+                if "cookies" in statistics:
+                    y_position = draw_wrapped_text(pdf, "Cookies analysis:", 50, y_position, max_width=width - 100)
+                    for browser, count in statistics["cookies"].items():
+                        y_position = draw_wrapped_text(pdf, f"  - {browser}: {count} cookies", 70, y_position, max_width=width - 100)
+                    check_page_break()
+
+        # Dodanie obrazów statystycznych
+        pdf.showPage()
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(50, height - 50, "Statistical visualizations:")
+        for image in statistics.get("images", []):
+            pdf.drawImage(image, 50, height - 250, width=500, height=200)
+            pdf.showPage()
 
 
         # Emails section
