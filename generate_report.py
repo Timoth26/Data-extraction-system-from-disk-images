@@ -160,10 +160,11 @@ def generate_pdf_report(partition_data, users, disk_image_name, personal_data, e
 
         for i in range(0, len(images), 2):
             pdf.showPage()
-            pdf.drawImage(images[i], 50, height - 250, width=width / 2 - 50, height=200)
-
+            pdf.drawImage(images[i], 50, 50, width=width - 100, height=height / 2 - 50)
+            
+            # Drugi obraz (jeśli istnieje) - pełna szerokość i połowa wysokości strony
             if i + 1 < len(images):
-                pdf.drawImage(images[i + 1], width / 2 + 50, height - 250, width=width / 2 - 50, height=200)
+                pdf.drawImage(images[i + 1], 50, height / 2 , width=width - 100, height=height / 2 - 50)
 
         # Emails section
         if email_results:
