@@ -9,7 +9,8 @@ def get_path(partition, extensions=[".txt"], skip_system_paths=True):
     system_paths = [
         "/proc", "/sys", "/dev", "/run", "/var/lib", "/var/run",  # Linux
         "C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)",  # Windows
-        "/usr", "/boot", "/etc",  # Linux
+        "/usr", "/boot", "/etc",
+        "/Windows", "/Program Files", "/Program Files (x86)"
     ]
 
     print(f"[INFO] Searching in the partition: {partition}")
