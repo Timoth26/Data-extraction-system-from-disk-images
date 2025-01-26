@@ -125,6 +125,7 @@ def main():
     analyze_results = {}
     social_results = []
     statistics = {}
+    statistics["images"]=[]
 
     if not os.path.exists('./results'):
         os.makedirs('./results')
@@ -186,22 +187,30 @@ def main():
 
     print("[INFO] Cookies analysis...")
     cookies_summary = {}
-    for social_result in social_results:
-        analyze_cookies([social_result], author['Nr'])
+    if social_results:
+        for social_result in social_results:
+            if not social_result: 
+                print("Pusty element:", social_result)
+            else:
+                print(social_result)
+                analyze_cookies([social_result], author['Nr'])
 
-        for browser, hosts in social_result.items():
-            cookies_summary[browser] = cookies_summary.get(browser, 0) + sum(hosts.values())
-        
-        statistics["images"]=[f"./results/browser_cookies_{author['Nr']}.png", f"./results/host_cookies_{author['Nr']}.png"]
+                for browser, hosts in social_result.items():
+                    cookies_summary[browser] = cookies_summary.get(browser, 0) + sum(hosts.values())
+                
+                statistics["images"]=[f"./results/browser_cookies_{author['Nr']}.png", f"./results/host_cookies_{author['Nr']}.png"]
     statistics["cookies"] = cookies_summary
 
 
-    if email_results and analyze_results:
+    if email_results:
         print("[INFO] Email and domain analysis...")
         emails_email, domains_email = extract_emails_and_domains("\n".join(email_results))
-        emails_analyze, domains_analyze = extract_emails_and_domains("\n".join(analyze_results))
-        emails_all = emails_email + emails_analyze
-        domains_all = domains_email + domains_analyze
+        emails_all = emails_email
+        domains_all = domains_email
+        if analyze_results:
+            emails_analyze, domains_analyze = extract_emails_and_domains("\n".join(analyze_results))
+            emails_all = emails_all + emails_analyze
+            domains_all = emails_all + domains_analyze
         email_counts = Counter(emails_all).most_common(10)
         domain_counts = Counter(domains_all).most_common(10)
         statistics["emails"] = email_counts
