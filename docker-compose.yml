@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  forensic-analyzer:
+    build: .
+    privileged: true
+    volumes:
+      - ./disk_images:/app/images:ro
+      - ./results:/app/results
+      - ./temp:/app/temp
+      - /dev:/dev
+    cap_add:
+      - SYS_ADMIN
+      - DAC_OVERRIDE
+    security_opt:
+      - apparmor:unconfined
+    command: ["--help"]
